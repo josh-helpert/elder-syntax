@@ -107,20 +107,19 @@ x
 
 ### Multiple parents
 
-When we say tree syntax it's really about describing the spacing rule and natural structure which is tree like.
+When we say tree syntax it's really about describing the natural structure is tree like.
 
 It's possible to describe data which isn't a tree like a graph:
 ```
-x
-  a
-  b, c
-    i
-    j
-    k
-  d
+a
+b, c
+  x
+  y
+  z
+d
 ```
 
-Notice that the syntax is still structurally a tree but we've described a graph as `b, c` are both the parents of `i, j, k`.
+Notice that the syntax is still structurally a tree but we've described a graph as `b, c` are both the parents of `x, y, z`.
 
 ## Equals
 ------------------------------------------------------------------------------------------------------------
