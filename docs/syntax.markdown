@@ -54,6 +54,24 @@ Using this, we can compact the sequence to:
 x, y, z
 ```
 
+### Sequences of Sequences
+We can express sequences of sequences by combining the syntaxes:
+```
+a, b
+c, d
+e, f
+```
+This is read as:
+* a sequence of 3 items
+* each item is a sequence
+* each item contains 2 elements
+
+Inline siblings (like `a, b`) are higher precedence than `\n` siblings this represents a sequence of multiple sequences.
+This is consistent b/c we don't allow mixing `,` and `\n` sibling syntaxes for the same siblings.
+
+Multiline precedence is done this way as it follows the natural English reading order top-to-bottom then left-to-right.
+We want our syntax to follow what one would expect so it's easier to predict.
+
 ## Tree
 ------------------------------------------------------------------------------------------------------------
 
@@ -86,6 +104,23 @@ x
     3
   c
 ```
+
+### Multiple parents
+
+When we say tree syntax it's really about describing the spacing rule and natural structure which is tree like.
+
+It's possible to describe data which isn't a tree like a graph:
+```
+x
+  a
+  b, c
+    i
+    j
+    k
+  d
+```
+
+Notice that the syntax is still structurally a tree but we've described a graph as `b, c` are both the parents of `i, j, k`.
 
 ## Equals
 ------------------------------------------------------------------------------------------------------------
@@ -311,9 +346,7 @@ We use paths to collapse the heirarchy from above to what we really are concerne
 ## Parentheses
 ------------------------------------------------------------------------------------------------------------
 
-Although we strive for tersness, parentheses are essential. Parentheses are unique in that they are used within the syntax and grammar but they are not data. They are to be used to provide information to a developer, compiler, and structure data/code but they have no data representation themselves. This makes them very useful to be a zero cost way to represent grouping of information as they are a syntactical tool and then are erased before the data/code is evaluated and executed.
-
-Think of parentheses as a way to create a temporary group to provide information to the software (and human) reader. Parentheses group it's contents together but will often be dropped when the reader encounters them.
+Although we strive for tersness, parentheses are essential. Parentheses are unique in that they are used within the syntax and grammar but they are not data. Instead, they are to be used to provide information to a developer, compiler, and structure data/code but are not data themselves. This makes them very useful to be a zero cost way to group data.
 
 Let's start with a simple example where we want to relate `x` and the sequence `a, b, c` you may expect something like this to work:
 ```
@@ -362,7 +395,7 @@ o
     z = 6
 ```
 
-Using our existing syntax we can represent this inline as a literal but it's rather noisey:
+Using our existing syntax we can represent this inline as a literal but it's rather noisy:
 ```
 o .a = 1, .b = 2, .c = 3, :x = 4, :y = 5, :z = 6
 ```
@@ -378,6 +411,32 @@ as a inline literal:
 ```
 o .(a = 1, b = 2, c = 3), :(x = 4, y = 5, z = 6)
 ```
+
+or as a inline chain:
+```
+o.(a = 1, b = 2, c = 3):(x = 4, y = 5, z = 6)
+```
+
+### Example - Sequence of Sequences
+
+With our current syntax we don't have a clear way to represent something like a sequence of sequences:
+```
+x =
+  a, b, c
+  d, e, f
+  j, k, l
+```
+
+Since inline sequences (like `a, b, c`) are higher precedence than `\n` siblings this represents a sequence of multiple sequences.
+Multiline precedence is done this way as it follows the natural English reading order top-to-bottom then left-to-right.
+We want our syntax 
+
+If we wanted to represent this inline it's now possible using parentheses:
+```
+x = ( (a, b, c), (d, e, f), (j, k, l) )
+```
+
+Remember that parentheses are not data (unlike lists). Instead, the parentheses indicate the grouping and precedence we want to describe.
 
 ### Example - HTML Generation
 
