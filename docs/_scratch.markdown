@@ -1,7 +1,49 @@
+## TODO
+* differentiate between simpler syntax and more complex
+  * means we can model simpler syntax b/c most of the complex are just sugar for simpler statements
+    * also means we more closely model simple syntax and then build on that
+  * decide when to add this, and other sugar, back in?
+    * need to decide the limits between most basic structure, sugar, etc. as even sugar itself can cause compositing issues
+  * eg
+    * complex
+      * selection `o.(a, b, c):(x, y)`
+      * multi-assign `o.(a, b, c) = 1, 2, 3`
+      * destructure `x, y, z == 1, 2, 3`
+    * simple
+      * seq of exp
+      * simple assign
+      * chain
+      * multiline lit
+      * inline lit? or just chain?
+* Add clarity on parens between precedence `()` and nested sequence `/()`
+  * add syntaxes for shorthand like `/x, /y` is `/(x, y)`
+  * Parentheses drop is many cases and don't make children
+    * but can be used to gruop expressions when not evaluated? like in `for`?
+    * `/()` is for sibling literal only but will also eval w/n?
+* until code is evaluated nothing is executed
+  * eg consider base:
+    ```
+    x = 1
+    y = x
+    ```
+    * Since doesn't eval, `y = x` is exactly that. Only in eval context can `y = 1`
+  * 
+* Headers and block sections
+  * Way to comment and group together, divide into steps, etc.
+    * Also useful to define custom directives, settings, metadata, etc. about the following block
+      * Can be used for a block or file header
+  * 
+
+
+
+
+
+
+
 ### Reduction
 
 (1)
-(a)
+(a) // Should this reduce to just `(a)`?
 (1 + 2)
 (1, 2)
 
@@ -49,9 +91,15 @@ Cases
       ```
       translates to shorter:
       ```
-      if (x > 0 and y < x and z > x)
+      if   (x > 0 and y < x and z > x)
       then (log x, y, z; z)
       else (log x, y, z; x)
+      ```
+      translates to shorter:
+      ```
+      if   x > 0 and y < x and z > x
+      then log x, y, z; z
+      else log x, y, z; x
       ```
       translates to inline:
       ```
@@ -79,7 +127,7 @@ Cases
         ```
         is also:
         ```
-        x (a, b, c)
+        x /(a, b, c)
         ```
   * eg
     * `if (...) then (...) else (...)`
@@ -1818,6 +1866,13 @@ TODO
 * Look at other solutions: StrictYAML, OGDL, InternetObject, GraphQL, other schema definition systems?
 * 
 
+## Not Representable
+------------------------------------------------------------------------------------------------------------
+
+Graphs which can't be represented should be multiline b/c too complex inline.
+
+Can be a feature, as well, because forces inline to be simple graph.
+
 ## Precedence
 ------------------------------------------------------------------------------------------------------------
 
@@ -1825,50 +1880,288 @@ TODO
 ### Relative Precedence
 
 
-## Why data-oriented/homoiconic syntax?
+### Parentheses Reduction
+
+* Notes
+  * When to know when () is for structural group and when for: precedence, sugar, etc.
+    * b/c () only describes when must be grouped together and in many cases is alone
+  * 2 types of ()
+    * wrapping
+    * start/stop
+  * When grouping one thing does it always drop?
+    * x vs (x) vs ((x))
+      * grouping 1 item does nothing b/c it's not dissambiguating or grouping anything
+      * cannot be it's own anonymous list b/c it's not data container
+  * Clear grouping and not:
+    * Clear, implicit group by syntax:
+      * notes
+        * notice it's unambiguous where these start and stop
+        * they always expand to a sequence of expressions
+      * examples
+        * chain: `x.(a = 1)`
+          * sugar -> value
+        * select: `x.(a, b, c):d`
+          * sugar -> seq of exp
+        * explicit fn-call: `f(1, 2, 3)`
+          * exp -> Any
+    * Operator, infix-like (which will drop surrounding parentheses):
+      * notes
+        * like an infix operator so it's either:
+          * unclear where it stops like mutliassign, destructure, fn-call juxtaposition
+          * want to specify precedence
+        * 
+      * examples
+        * multi-assign: `x.(a, b, c) = 1, 2, 3`
+          * exp -> seq of exp
+        * destucture: `x, y, z == 1, 2, 3`
+          * exp -> seq of exp
+        * exp: `x + y`
+          * exp -> value
+        * fn-call juxtaposition: `f a, b, c`
+          * exp -> Any
+    * Not grouping:
+      * notes
+        * the common sibling structure of Elder syntax
+      * examples
+        * seq of exp: `x = 0, y, z = 2`
+  * ideas
+    * non-composable types? this realisitic?
+  * Cases to test:
+    * same siblings
+    * nested
+    * with parentheses
+    * in context of variuos types like:
+      * siblings
+      * operators
+      * 
+  * contexts used in:
+    * evaluation: will reduce to a single value and `()` are dropped
+      * eg
+        * precedence
+          ```
+          (1 + 2)            => 3
+          x = (1, 2, 3)      => same
+          x = (1, (2), 3)    => x = (1, 2, 3)
+          x = (1, (2, 3), 4) => x = (1, (2, 3), 4)
+          ```
+    * data definition: reduce to seq of exp and `()` are meaningful
+      * eg
+        * `1, (2, 3), 4`
+        * 
+    * assigning names: reduce to a seq of exp (l-hand) and values (r-hand)
+      * always uses `=` or `==`
+        * always on the L-hand to select name and structure which desugars into a sequence of names
+      * maybe just a subset of data defn?
+      * eg
+        * `a = 0, (b, c == 1, 2), d = 3 => a = 0, b = 1, c = 2, d = 3`
+        * `a = 0, (b, c, d == f()), e   => a = 0, b = f():0, c = f():1, d = f():2, e`
+        * `(x, y, z) = f()              => x = f():0, y = f():1, z = f():2`
+        * `x, y, z == f()               => x = f():0, y = f():1, z = f():2`
+    * unevaluated code block: `()` are preserved until processed
+      * eg
+        * `for ((i:Int = 0, j:Int = 0), (i < 10, j < 100), (i += 1, j += 10)) (...body...)`
+        * `if (x > 0 and y < 4) then (log x; x) else (log y; y)
+    * sugar
+      * all reduce to sequence of expressions?
+      * eg
+        * selector
+          * `x.(a, b, c):(d)        => x.a, x.b, x.c, x:d`
+          * `x.(a, y:(b, c), d):(e) => x.a, x.y:b, x.y:c, x.d, x:e`
+        * chain
+          * `o.(a, b == 1, 2) = 0 => o.(a = 1, b = 2) = 0 => o = 0, o.a = 1, o.b = 2`
+            * notice `()` not dropped b/c of prefix?
+          * `o.(a = 0, (b, c == 1, 2), d = 3) = 0 => o.(a = 0, b = 1, c = 2, d = 3) = 0`
+            * notice `()` dropped within b/c no prefix?
+          * `o.(a = 0, p:(b, c == 1, 2), d = 3) = 0 => o.(a = 0, p:(b = 1, c = 2), d = 3) = 0`
+            * notice `()` not dropped b/c of prefix?
+
+examples:
+
+
+
+Single item always reduces:
+```
+x     => x
+(x)   => x
+((x)) => x
+```
+
+Expressions reduce to single value:
+```
+1 + 2     => 3
+(1 + 2)   => 3
+((1 + 2)) => 3
+```
+
+Literal definition is only head name:
+```
+x .(a = 1)     => x
+(x .(a = 1))   => x
+((x .(a = 1))) => x
+```
+
+Chain definition is on head name:
+```
+x.(a = 1) = 0     => x
+(x.(a = 1) = 0)   => x
+((x.(a = 1) = 0)) => x
+```
+
+Selection has natural start/stop:
+```
+x.(a, b, c):(d)     => x.a, x.b, x.c, x:d
+(x.(a, b, c):(d))   => (x.a, x.b, x.c, x:d)
+((x.(a, b, c):(d))) => (x.a, x.b, x.c, x:d)
+```
+
+Multiple assign is a infix operator (so must have parens for expression):
+- but isn't this decidable? b/c we know exactly how many elements will be assigned? and `=` is lower precedence than `,`?
+```
+???
+x.(a, b, c) = 1, 2, 3     => x.a = 1, x.b = 2, x.c = 3
+(x.(a, b, c) = 1, 2, 3)   => x.a = 1, x.b = 2, x.c = 3
+((x.(a, b, c) = 1, 2, 3)) => (x.a = 1, x.b = 2, x.c = 3)
+```
+
+Destruture is a infix operator (so must have parens for expression):
+```
+???
+x, y, z == 1, 2, 3     => x, y, z
+(x, y, z == 1, 2, 3)   => x, y, z
+((x, y, z == 1, 2, 3)) => (x, y, z)
+```
+
+Sequence of expressions are the basic syntax:
+```
+x = 0, y, z = 2     => x, y, z
+(x = 0, y, z = 2)   => (x, y, z)
+((x = 0, y, z = 2)) => (x, y, z)
+```
+
+used in:
+
+a = (1, ?, 3)
+b = (1, (?), 3)
+
+
+if these rules apply how to deal with complex forms like `for`?
+```
+for ((i:Int = 0, j:Int = 0), (i < 10, j < 100), (i += 1, j += 10))
+  ...body...
+```
+note that:
+* these are code blocks which aren't evaluated
+  * it doesn't matter if it's an expression or not (b/c it's uneval)!
+    * this means our rules about inner expression really isn't the case b/c only if processing code will `do` it?
+
+
+scratch:
+* what about wrapping a function return? b/c it's dynamic?
+  ```
+  f = () -> (2, 3)
+
+  a = (1, f(), 4)           => 1, 2, 3, 4
+  b = (1, (f()), 4)         => 1, (2, 3), 4 or 1, 2, 3, 4 // depending if wrapping return is meaningful when not literal
+  c = (1, (x, y) = f(), 4)  => 1, x = 2, y = 3, 4
+  d = (1, (x, y == f()), 4) => 1, x = 2, y = 3, 4
+  ```
+  * May be useful to have different syntax for wrapping vs precedence?
+    * We know if there's multiple `()` then there will never be more than one once complete?
+    * Could have wrap-like syntax which must use spaces or multiple?
+      * eg
+        ```
+        a = (1, f(),       4)
+        b = (1, (f()),     4)
+        c = (1, ((f())),   4)
+        d = (1, ( f() ),   4)
+        e = (1, (( f() )), 4)
+        f =
+          1
+          f()
+          4
+        ```
+      * Differences between:
+        ```
+        ?       // natural value
+        (?)     // precedence, sugar, other?
+        ( ? )   // precedence, sugar, other?
+        (( ? )) // group
+        ```
+        * this would drastically affect things like the usage of `for`?
+          ```
+          for ((i:Int = 0, j:Int = 0), (i < 10, j < 100), (i += 1, j += 10))
+
+          for ( (( i:Int = 0, j:Int = 0 )), (( i < 10, j < 100 )), (( i += 1, j += 10 )) )
+
+          for | (i:Int = 0, j:Int = 0), (i < 10, j < 100), (i += 1, j += 10) |
+
+          for ( i:Int = 0, j:Int = 0 | i < 10, j < 100 | i += 1, j += 10 )
+          ```
+
+## Types of grouping
 ------------------------------------------------------------------------------------------------------------
 
-Benefits:
-* Data defn and code already share most of same syntax and semantics w/ relatively minor variants. Much overlap and common patterns. Just need a bit more abs (eg relators) to better unify syntax.
-* Much easier to write DSL, parsers, analyzers, macros, comptime, etc. for developers b/c must define interpretation of data in many ways instead of many new syntaxes which contrain the types of abstractions, executions, etc. we can do
-  * eg sometimes a Logic exec makes sense and sometimes a Functional exec makes sense or ... it should depend on the domain, constraints, and the problem instead of prescribed by the language.
-  * eg can define custom metadata and write analyzer to do security audit instead of custom syntax or macros. Can still be executed at comptime and runtime depending on needs.
-* Much less keywords, specialized syntax, custom rules, etc. and instead almost everything is data and custom interpretations of that data (ie custom semantics b/c of interpretation context)
-* Much easier to define many custom contexts instead of new syntax to fit all the various domains, environments, problems, etc.
-* Syntax can stay relatively small and be used to model almost anything. Almost all of the benefits of homoiconic w/ much less verbosity and visual noise
-* Easier to visualize the AST
-* Many fewer syntax elements to keep track of compared to most syntaxes:
-  * identifier
-  * values
-  * relator
-  * sugar
-  * reserved
-    * keywords
-    * meaningful names (like `#`)
-  * 
+```
+`
+'
+"
+~
+^
+$
+%
+@
+```
+
+* syntax options
+  * open/close
+    ```
+    (
+    ((
+    [
+    [[
+    {
+    {{
+    |
+    ||
+    <
+    <<
+    ```
+  * delimiter
+    ```
+    |
+    ||
+    ,
+    ,,
+    ;
+    ;;
+    .
+    ..
+    ...
+    ```
 * 
 
-Downsides:
-* Developers can extend in more arbitrary ways than other languages which can lead to less clear semantics b/c the contexts they define determine the semantics of the data they provide
-* 
+## Captures
+-------------------------------
+asign results of capture:
+```
+// Get results of block
+a, b, c = do
+  ...
 
-### Syntax of One
+// Use results of prev block as capture to new block
+// Get results of block
+x, y, z = do (a, b, c)
+  ...
 
-Ideas:
-* Same w/ reducing parens `(x) === x`
-* Child single elem
-  ```
-  x
-    a
-  ```
-* A single sibling is meaningless, it's just an item
-* Seq is syntax, not data, and thus not a container
-  * It's about making heirarchy clear
-* What about diff between:
-  ```
-  x.(a) = 0
+log x, y, z
+```
 
-  x.a = 1
-
-  x.(a = 1) = 0
-  ```
+vs do in steps/chain:
+```
+|>
+  do
+    ...
+  do (prev/0, prev/1, prev/2)
+    ...
+  log (prev/0, prev/1, prev/2)
+```

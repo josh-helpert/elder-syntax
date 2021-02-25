@@ -6,14 +6,7 @@ permalink: basic-types
 
 It's useful to describe constraints about a program; arguably the most common way is using Types. Most languages differentiate between concepts like types, interfaces, abstract classes, traits, etc. In Elder, they're all just different ways to describe data using metadata.
 
-The metadata relator `:` allows the developer to define whatever metadata constructs they find useful outside of what's defined within Elder syntax. It's used for both common concepts (like types) but can be extended to more nuanced constructs like constant-ness, capabilities-secure, or even business logic for a certain domain. The goal is to allow the developer to extend their model to whatever they need to solve their problem. Since often this changes for different domains and use-cases, the model must be able to be customized.
-
-This doesn't mean that every type can be represented in every environment. If an implementation doesn't natively support the types there's a few ways to configure how the environment responds:
-* When possible, emulate the type
-* Default to a more general type
-* Throw a compile time error on use
-
-All that Elder syntax guarantees is that if it's defined, it must mean what is specified in Elder syntax standard. Not that it must be defined.
+The metadata relator `:` allows the developer to define whatever metadata constructs they find useful outside of what's defined within Elder syntax. It's used for both common concepts (like types) but can be extended to more nuanced constructs like constant-ness, object-capability, concurrency, or even business logic for a certain domain. Elder prefers that the problem decides the appropriate model instead of the reverse. This means Elder must allow the developer to extend their model to whatever they need to solve their problem. Since often this changes for different domains and use-cases, the model must be able to be customized.
 
 ## Reserved and Builtin
 ------------------------------------------------------------------------------------------------------------
@@ -22,7 +15,14 @@ Elder reserves and specifies various types, literals, primitives, and constants 
 
 Since we're starting with the most common concepts, notice that these are abstractions and don't represent the actual implementation. To keep it simple, more concepts will be introduced incrementally.
 
-### Literals
+Not every type can be represented in every environment. If an implementation doesn't natively support the types there's a few ways to configure how the environment responds:
+* When possible, emulate the type
+* Default to a more general type
+* Throw a compile time error on use
+
+All that Elder syntax guarantees is that if it's defined, it must mean what is specified in Elder syntax standard. Not that it must be defined. For example, `I32` (a 32 bit integer) doesn't have a native representation in JavaScript VM but it can be emulated using a bit of extra code the compiler can generate, default to a JavaScript builtin `Number`, or throw a comptime error on use.
+
+### Literals Types
 
 We follow the conventions of many languages for the most basic literals. Each literal uses the default implementation for the environment it's running in.
 
@@ -64,10 +64,10 @@ The most common are:
       c = 3
     ```
 * `"` is a inline `String`
-  * Every character after starting quote is it's content
+  * Every character after starting quote is it's content including whitespace
   * The escape character `\` works as expected
   * Terminates
-    * Is terminated by closing `"` or at end of line
+    * Since inline, is terminated by closing `"` or at end of line
   * eg these are equivalent
     ```
     str = "my long name"
@@ -105,7 +105,7 @@ The most common are:
   * The characters of it's content ignore the leading space of a 2-space indent
   * The escape character `\` works as expected
   * Terminates
-    * Is terminated by dedent
+    * Since it multiline, is terminated by dedent
   * eg these are equivalent
     ```
     str = """
@@ -128,6 +128,32 @@ The most common are:
         name
     ```
 
+### Literal Values
+
+TODO:
+* Primitives values
+  * True, False
+  * Null
+  * Undefined
+* Numeric
+  * Decimal 1.0
+  * Integral 4
+  * Ratio (3/4)
+  * Hex 0xF00D
+  * Binary 0b1010
+  * Octal 0o744
+* Logic
+  * True, False
+  * Maybe? Optional?
+  * 
+* edge-cases
+  * Implicit or explicit coersion
+    * 1.0 * 2
+    * 1 / 2.0
+  * Implicit or explicit type casting
+    * ie all `Decimal` are `Number` but not vice-versa
+    * if implicit is diff between logical and memory type and both can be tracked separately so can still be customized and matched against
+
 ### Basic Types
 
 Although there are many builtin types, let's start with the most common:
@@ -142,15 +168,34 @@ Although there are many builtin types, let's start with the most common:
   * `Map` represents a series of key-value pairs
   * `String` represents a series of characters
   * `Optional` represents a value which may not be present
+* Logic
+  * `Bool` only can be values `True` or `False`
+
+TODO:
+* No need for tuple b/c implicit w/ Seq?
+  * Other not needed?
+* Enum?
+* Meta
+  * Unknown
+  * Any
+  * Void
+  * Never
+  * Null and Undefined
+* String prefix
+  * eg raw string `r"\t\n"` is exactly `"\t\n"` not expanded
+    * further `r"a""b"` will expand as `a"b"`
+  * a common pattern where we have a very reserved syntax have multiple modes? especially w/ prefix?
 
 ## Types
 ------------------------------------------------------------------------------------------------------------
 
-Types get special treatement as they're so widely used and useful.
-
 Syntactically a type must start with a alphabetic, upper-case character and each new word of it's name should be upper-case like `MyTypeName`.
 
+### Logical vs Memory Type???
+
 ### Type Sugar
+
+Types get special treatement as they're so widely used and useful.
 
 Lets start simple with an example:
 ```
@@ -179,3 +224,25 @@ It is a syntax error to set both the `type` and use the shorthand together like:
 ```
 x:(Integral, type = Decimal) = 4
 ```
+
+### Logical vs Storage
+
+Often when a type is specified it's implicitly a 
+
+## Narrowing
+------------------------------------------------------------------------------------------------------------
+
+TODO:
+* Consider introducing `and`, `or` types b/c we can specify later on more fully?
+* When const, will narrow to known value
+  * This is true of everything even w/ comptime!
+  * eg diff
+    ```
+    const hola-world = "Hola World" // Type is value "Hola World"
+
+    let hello-world = "Hello World" // Type is String
+    ```
+* Literals
+  * `or` type like `1 or 2 or 3` or `or(1, 2, 3)` or `1...3` or `1..<3`
+  * 
+
