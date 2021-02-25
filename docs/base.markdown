@@ -7,7 +7,7 @@ permalink: syntax
 
 The elements in this document form the base of Elder syntax.
 
-Must how S-expressions are separate from any LISP implementation but is the most commonly used syntax; the Elder syntax can be used alone but is the preferred syntax of the Elder language.
+Much how S-expressions are separate from any LISP implementation but is the most commonly used syntax; the Elder syntax can be used alone but is the preferred syntax of the Elder language.
 
 ## Sequence
 ------------------------------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ z
 ```
 
 ### Inline Siblings
-To write more compact code we have to introduce new syntax. The comma `,`:
+To write more compact code we have to introduce new syntax. The comma `,` which:
 * Represents a sibling w/n a sequence
 * Internally `,` translates into a `\n` so the two forms are equivalent
 * For consistency and clarity, you can't mix inline and multiline syntax `,` for the same sequence
@@ -503,7 +503,7 @@ y = 2
 Since destructuring is very common we introduce a new syntax `==` which makes it easier to express with minimal visual noise. This is nearly identical to `=` except that:
 * It's relative precedence is less than `,`
   * Note: We don't support a global precedence table like many C-style languages, instead all precedence is either relative or not-defined and you must use `()`
-* It groups the L-hand and R-hand into `()`. This means `a, b == x, y` is basically `(a, b) = (x, y)`
+* It groups the L-hand and R-hand into `()`. This means `a, b == x, y` becomes `(a, b) = (x, y)`
 
 Using the new syntax, there's a few ways to make this example parse as a destructure:
 * Use `()` to group children together
@@ -515,37 +515,10 @@ Using the new syntax, there's a few ways to make this example parse as a destruc
   (x, y) = 1, 2
   ```
   It's clear now that we mean we can to assign both values `x, y`.
-* Use `==` syntax
+* Use `==` syntax which reduces the need for parentheses in many cases
   ```
   x, y == 1, 2
   ```
-
-### Nested Destructure
-
-Consider a slightly more complex example with nested destructuring:
-```
-a, (b, c == 1, 2) == (x, y == 3, 4), z
-```
-
-which after 1 step of evaluation is:
-```
-a, (b = 1, c = 2) == (x = 3, y = 4), z
-```
-
-after another step:
-```
-(a, b = 1, c = 2) = (x = 3, y = 4, z)
-```
-
-finally evaluates to:
-```
-(a, b = 1, c = 2) = (x = 3, y = 4, z)
-```
-
-for clarity, the original expression expands to explicit precedence:
-```
-(a, ((b, c) = (1, 2))) = (((x, y) = (3, 4)), z)
-```
 
 ## 6 Common Patterns
 ------------------------------------------------------------------------------------------------------------
@@ -755,6 +728,7 @@ let myElems = [
   [ a, [ b, c ], d ],
   [ i, [ j, k ], l ],
   [ w, [ x, y ], z ]
+]
 ```
 
 With our existing syntax we can model this in a similar way:
@@ -929,7 +903,7 @@ This may seem an ackward choice but there are a few reasons this design was chos
     ```
     Although it's possible to make deterministic rules it does grow in complexity quickly and makes it harder to visually parse.
   * This has an added benefit in that dev are free to use parentheses and nest as deeply as they like and know they will be dropped.
-* It's not desirable to make computation and data definition orthogonal. Often we want to mix them together without having to do something like create a template and then bind values.
+* It is not desirable to make computation and data definition orthogonal contexts. Often we want to mix them together without having to do something like create a template and then bind values.
 * Parentheses stay somewhat pure in their purpose and usage. They can stay just syntax (not data) and their purpose is to group things together.
 * It's somewhat rare to nest inline children when there's many more visually clear ways to declare data.
 * It keeps the syntax for inline children `/()` orthogonal to precedence/grouping `()`. The purpose and effect is clear.
