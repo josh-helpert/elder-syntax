@@ -5,12 +5,16 @@ description: A minimal, data-oriented, and expressive syntax
 permalink: syntax
 ---
 
-Base syntax
+The elements in this document form the base of Elder syntax.
+
+Must how S-expressions are separate from any LISP implementation but is the most commonly used syntax; the Elder syntax can be used alone but is the preferred syntax of the Elder language.
 
 ## Sequence
 ------------------------------------------------------------------------------------------------------------
 
-A ***Sequence*** (much like LISP, Rebol) is a core syntactical structure. A sequence is:
+A ***Sequence*** (much like LISP, Rebol) is a core syntactical structure.
+
+In Elder, a sequence is:
 * A ordered, series of elements
 * A syntactical concept
 * Not a List, Array, Series, Set, et al. b/c these all make more and different guarantees
@@ -25,7 +29,7 @@ z
 ```
 
 ### Inline Siblings
-To write more compact code we have to introduce new syntax `,`
+To write more compact code we have to introduce new syntax. The comma `,`:
 * Represents a sibling w/n a sequence
 * Internally `,` translates into a `\n` so the two forms are equivalent
 * For consistency and clarity, you can't mix inline and multiline syntax `,` for the same sequence
@@ -44,16 +48,13 @@ e, f
 ```
 This is read as:
 * a sequence of 3 items
-* each item is a sequence
-* each item contains 2 elements
+* each item is a sequence of 2 items
 
-Inline siblings (like `a, b`) are higher precedence than `\n` siblings this represents a sequence of multiple sequences.
+Inline siblings (like `a, b`) are higher precedence than `\n` siblings which allows us a intuitive way to represent a sequence of multiple sequences.
 This is consistent b/c we don't allow mixing `,` and `\n` sibling syntaxes for the same siblings.
 
-Multiline precedence is done this way as it follows the natural English reading order top-to-bottom then left-to-right.
+Multiline precedence is done this way as it follows the natural English reading order of top-to-bottom then left-to-right.
 We want our syntax to follow what one would expect so it's easier to predict.
-
-How to model more complex data will be introduced later.
 
 ## Tree
 ------------------------------------------------------------------------------------------------------------
@@ -75,9 +76,9 @@ This code tells us that:
 * `a, b, c` are children of `x` b/c they're nested under x w/ a 2 space `INDENT`
 * `a, b, c` are siblings b/c they're at the same indendation level under the same parent
 
-2 spaces are used b/c it's the minimal amount to make it clear there's indentation. No tabs, no variable spaces, nothing but 2 spaces per indentation. Later in this document there are ways to compact the syntax.
+2 spaces are used b/c it's the minimal amount to make it clear there's indentation. No tabs, no variable spaces, nothing but 2 spaces per indentation.
 
-This can be nested arbitrarily and the structure matches what you expect as the layout matches the code layout:
+This can be nested arbitrarily and the structure matches what you expect as the visible layout matches the code layout:
 ```
 x
   a
@@ -88,11 +89,9 @@ x
   c
 ```
 
-### Multiple parents
+### Multiple Parents
 
-When we say tree syntax it's really about describing the natural structure is tree like.
-
-It's possible to describe data which isn't a tree like a some graphs:
+Combining our syntaxes thus far we are also able to model some simple graphs:
 ```
 a
 b, c
@@ -102,14 +101,14 @@ b, c
 d
 ```
 
-Notice that the syntax is still structurally a tree but we've described a simple graph as `b, c` are both the parents of `x, y, z`.
+Notice that the syntax is still structurally a tree but the data models a simple graph b/c `b, c` are both the parents of `x, y, z`.
 
 ## Equals
 ------------------------------------------------------------------------------------------------------------
 
 Equals (`=`) is a syntax which captures the pattern of relating ***L-hand*** to a ***R-hand***.
 
-The precise relationship between ***L-hand*** and ***R-hand*** varies with the context it's defined in (eg assignment, mapping between names and values, key-value entry)
+The precise relationship between ***L-hand*** and ***R-hand*** varies with the context it's defined in. Commonly it means definition of mapping a name to a value but it can also mean assignment, key-value entry, among others. The meaning of `=` is made clear by the context it's used in.
 
 We can model definition or assignment:
 ```
@@ -127,12 +126,9 @@ obj
 ```
 This is read as:
 * name `obj` has 3 children
-* the 1st child is `a = 1`
-  * name `a` relates to value `1`
-* the 2nd child is `b = 2`
-  * name `b` relates to value `2`
-* the 3rd child is `c = 3`
-  * name `c` relates to value `3`
+* the 1st child is `a = 1` where name `a` relates to value `1`
+* the 2nd child is `b = 2` where name `b` relates to value `2`
+* the 3rd child is `c = 3` where name `c` relates to value `3`
 
 ### Equals Newline
 Sometimes it makes sense to not have the value on the same line as the `=`.
@@ -171,21 +167,28 @@ There's a few cases where the values is:
       b
       c
   ```
-  * This is equivalent to `x = (a, b, c)`. This is b/c the sequence `a, b, c` are all immediate children of `x`
-  * Often useful when you want to store a literal, multi-valued, container-like (eg `List`, `Sequence`, `Map`)
+  * This is equivalent to `x = (a, b, c)`
+  * Often useful when you want to store a literal, multi-valued, container like `List`, `Sequence`, `Map`
 
 ## Relator
 ------------------------------------------------------------------------------------------------------------
 
-A ***Relator*** is a syntactical tool which models the ***relation*** between a ***target*** and a ***descriptor***. Customizing the syntax allows developers to add structure to the syntax without the need of macros (although more constrained than what macros provide).
+Since Elder syntax can be used for various use-cases (from serializing data like JSON to imperative programming like Java and more) it must be able to represent many ways to define, format, and structure data.
 
-To understand this concept better consider other languages which are often hard coded:
+For example, consider other languages which are often use hard coded syntax:
 * `C++`
-  * accessing a `Namespace` uses `::` and is used like `my_namespace::my_val`
-  * accessing a `Struct` field uses `.` and is used like `my_stuct.field` or `my_struct.field = 1`
+  * accessing a `Namespace` uses `::` syntax like `my_namespace::my_val`
+  * accessing a `Struct` field uses `.` syntax like `my_stuct.field` or `my_struct.field = 1`
 * `Clojure`
-  * accessing a `Namespace` uses `/` and is used like `my_namespace/my_val`
-  * interop with `Java` or `JavaScript` uses `.` and is used like `(.toUpperCase "jane")`
+  * accessing a `Namespace` uses `/` syntax like `my_namespace/my_val`
+  * interop with `Java` or `JavaScript` uses `.` syntax like `(.toUpperCase "jane")`
+* `XML`
+  * accessing a child element uses `/` syntax like `car/wheel/rim`
+  * accessing a attribute uses `.` syntax like `car.weight`
+
+Elder syntax takes a different approach by allowing the developer to create their own syntax in a limited way. Customizing the syntax allows developers to add structure to the syntax without the need of macros.
+
+To accomplish this, we introduce a new syntax we've termed a ***Relator***. Specifically a ***Relator*** is defined as a syntactical tool which describes the ***relation*** between a ***object*** and a ***descriptor***.
 
 Functionally it works much like a **namespace** but:
 * characters can only be specific punctuation
@@ -199,18 +202,20 @@ Functionally it works much like a **namespace** but:
   * This also means multiple characters can be combined to make new relators.
     * For example, if `:`, `.`, `/` are all relators then `:./` would form a new relator distinct from the others.
 
-Although developers can define their own, there are 3 relators are required to mean:
-* `/` the child relator for parent-child relation
-  * Often used to represent child inline
-  * Replaces indentation
-* `.` the dot relator for object-property relation
-  * Often used to represent properties or attributes of an object
+Although developers can define their own relators, there are 3 relators which must have a common meaning:
+* `/` the child relator for parent-child relation like:
+  * for HTML, a DOM child element
+  * for namespaces, a child namespace
+  * for files, a directory to it's contents
+* `.` the dot relator for object-property relation like:
+  * for OOP (and many other) languages, accessing the fields of a instance
+  * for HTML, accessing a attribute of a DOM element
 * `:` the meta relator for data-metadata relation
   * used to represent metadata of any data (and since it's homoiconic it can target almost anything)
-  * does the work of describing conceptsa like types, constraints, relative types, rules, etc.
+  * does the work of describing concepts like types, constraints, traits, interfaces, rules, etc.
 
 ### Literal
-In order to model data without additional syntactical noise, data can be written as literal trees. For relators, there's a few rules:
+In order to model data without additional syntactical noise, data can be written as literal trees using relators. Like most syntax, there's a few rules:
 * When multiline, it must match the layout of a tree as described above.
 * When inline, there must be a space between the target and the first relator.
 
@@ -226,9 +231,9 @@ obj
 
 This is read as:
 * declare tree literal with name `obj`
-* add child to `obj` of `.` relation with name `a` then define as `0`
-* add child to `obj` of `.` relation with name `b`
-* add child to `obj` of `.` relation with name `c` then define as `2`
+* add `.` relation to `obj` with name `a` then define as `0`
+* add `.` relation to `obj` with name `b`
+* add `.` relation to `obj` with name `c` then define as `2`
 
 is equivalent to when grouped under a relator:
 ```
@@ -241,7 +246,7 @@ obj
 
 This is read as:
 * declare tree literal with name `obj`
-* add child to `obj` of `.`
+* add `.` relation to `obj`
 * add child to `.` with name `a` and define as `0`
 * add child to `.` with name `b`
 * add child to `.` with name `c` and define as `2`
@@ -252,6 +257,7 @@ obj .a = 0, .b, .c = 2
 ```
 
 ### Path
+
 One aspect that's unique to relators is that they're used to create paths in order to:
 * define data
 * abstacts over concepts like file and network paths
@@ -289,7 +295,9 @@ o.b:x = 3
 ```
 This is read the same as the previous example however the final step will assign `3` to `x`.
 
-Using paths we can also change how we define data. Consider an alternative way to define the above example:
+### Terse Data Description
+
+Paths also expand how we can define data; often more tersely. Consider an alternative way to define the above example:
 ```
 o.
   a = 0
@@ -315,7 +323,7 @@ html
               width  = 100%
               height = 20px
 ```
-Notice that there's lots of extra structure to get to the real work of setting `width` and `height` which is the purpose of this block.
+Notice that there's lots of extra structure to get to the real work of setting `width` and `height` which is the "real work" of this block.
 
 Using paths we can do better and remove most of the syntactical noise:
 ```
@@ -373,7 +381,7 @@ o
     z = 6
 ```
 
-Using our existing syntax we can represent this inline as a literal but it's rather noisy:
+Using our existing syntax we can represent this inline as a literal but it's rather noisy and requires manually keeping the structure in our head:
 ```
 o .a = 1, .b = 2, .c = 3, :x = 4, :y = 5, :z = 6
 ```
@@ -407,7 +415,7 @@ x =
   j, k, l
 ```
 
-Parentheses are only used for representing precedence and the start/stop of something. If want to represent this inline we would need to use the `/` syntax for a parent-child relator:
+Parentheses are only used for representing precedence and the start/stop of something. If want to represent the above inline we would need to use the `/` syntax for a parent-child relator:
 ```
 x = ( /(a, b, c), /(d, e, f), /(j, k, l) )
 ```
@@ -418,7 +426,7 @@ Syntactical sugar will be introduces later which remove more of the visual noise
 
 Parentheses especially help when combining multiple relators to describe more complex structure. Consider the template psuedo code:
 ```
-div .(id = "intro", class = "spashscreen", style.css.(width = 100%, height = 20px)), :visible-if = "is-first-view"
+div .(id = "intro", class = "spashscreen"), :visible-if = "is-first-view"
   h1 .class = "title"
   p .class = "description"
 ```
@@ -432,40 +440,40 @@ using a theoretical HTML generator this would translate to:
 ```
 Notice that `:visible-if` is an example of a field used for logic in a template. It could either be rendered w/n the HTML (as above) or erased at comptime depending on the use-case.
 
-This syntax is much closer to what we see in languages that model trees directly such as: SDLang, YAML, Pug, SASS. To compact the syntax further syntax sugar and macros should be used although they outside the scope of this document.
+This syntax is much closer to what we see in languages that model trees directly such as: SDLang, YAML, Pug, SASS. To compact the syntax further syntax sugar and macros should be used although they outside the scope of the introduction to the syntax.
 
 ### Example - Terse HTML inline CSS
 
-Consider a use-case where we want to model a HTML element w/ inline CSS.
+Consider a use-case where we want to model a HTML element w/ inline styles.
 
-Implicitly create `.style.css` structure as they're necessary steps for valid HTML:
+Implicitly create `.style` structure as they're necessary steps for valid HTML:
 ```
 // As a multiline literal
 my-element
-  .style.css.
+  .style.
     width  = 100%
     height = 20px
 
 // or, as a multiline literal w/ '.' ending
 my-element
-  .style.css
+  .style
     .width  = 100%
     .height = 20px
 
 // or, as a multiline literal w/ fully collapsed context
-my-element.style.css.
+my-element.style.
   width  = 100%
   height = 20px
 
 // or, as inline literal (notice space between head and relator '.')
-my-element .style.css.width = 100%, .style.css.height = 20px
+my-element .style.width = 100%, .style.height = 20px
 
 // or, as assignment (no space)
-my-element.style.css.width  = 100%
-my-element.style.css.height = 20px
+my-element.style.width  = 100%
+my-element.style.height = 20px
 
 // or, as assignment w/ selection
-my-element.style.css.(width, height) = 100%, 20px
+my-element.style.(width, height) = 100%, 20px
 ```
 These variations are made available to fit various use-cases. The form which best models the data it's describing and terse should be preferred.
 
@@ -476,20 +484,20 @@ Destructuring is useful as it allows us to deal directly with the structure of d
 
 With our current syntax the problem is that `=` is a higher precedence than `,`. This means code like:
 ```
-x, y = 1, z
+x, y = 1, 2
 ```
 
 is intepreted as:
 ```
 x
 y = 1
-z
+2
 ```
 
 not:
 ```
 x = 1
-y = z
+y = 2
 ```
 
 Since destructuring is very common we introduce a new syntax `==` which makes it easier to express with minimal visual noise. This is nearly identical to `=` except that:
@@ -500,16 +508,16 @@ Since destructuring is very common we introduce a new syntax `==` which makes it
 Using the new syntax, there's a few ways to make this example parse as a destructure:
 * Use `()` to group children together
   ```
-  (x, y) = (1, z)
+  (x, y) = (1, 2)
   ```
   It's really only essential to group the L-hand is the R-hand can be inferred as a sequence. So, in this case, this would work as well:
   ```
-  (x, y) = 1, z
+  (x, y) = 1, 2
   ```
   It's clear now that we mean we can to assign both values `x, y`.
 * Use `==` syntax
   ```
-  x, y == 1, z
+  x, y == 1, 2
   ```
 
 ### Nested Destructure
@@ -534,6 +542,11 @@ finally evaluates to:
 (a, b = 1, c = 2) = (x = 3, y = 4, z)
 ```
 
+for clarity, the original expression expands to explicit precedence:
+```
+(a, ((b, c) = (1, 2))) = (((x, y) = (3, 4)), z)
+```
+
 ## 6 Common Patterns
 ------------------------------------------------------------------------------------------------------------
 
@@ -547,9 +560,10 @@ Multiline literals can only be embedded within other multiline literals as it's 
 
 ```
 x = 0
-  .a = 1
-  .b = 2
-  .c
+  .
+    a = 1
+    b = 2
+    c
   :d = 3
 y
 z
@@ -649,7 +663,7 @@ x = 0, y, z.a = 2
 The example reads as:
 * `x, y, z` are siblings
 * `x` is bound to value `0`
-* `z` has a property relator `.` with child `a`. `a` is bound to value `2`.
+* select `x.a` which is then bound to value `2`.
 
 This is equivalent to the much more clear:
 ```
@@ -658,102 +672,13 @@ y
 z.a = 2
 ```
 
-The inline form is more clear when describing the internal structure of a name. Consider if the above example is a child of relator like:
+The inline form is more appropriate when describing the internal structure of a name. Consider if the above example is a child of relator like:
 ```
 o.(x = 0, y, z.a = 2)
 ```
 
 This is more clear as the series of expressions describe the properties of `o` and syntactically looks like the attributes of `o`.
 
-### Orthogonal Syntax
-
-The above syntax patterns generally fall into one of two goals:
-* Describing internal structure of a name (multiline literal, inline literal, chain)
-* Describing multiple names regardless if they belong to a common parent (selection, destructure, sequence of expressions)
-
-The goals are separate so that it's easier to compose data without worrying about the internal structure of a name.
-
-To keep them mostly orthogonal, we introduce a rule which we'll explore with examples below. The rule is: ***if assigning values to names within a parent name, only the parent will be exposed to the outside.***
-
-Here's a simple example:
-```
-x.(a = 1) = 0
-```
-If the L-hand expression `x.(a = 1)` returned `x.a` this would result in `x.a = 1` then `x.a = 0`. `x.a` being overwritten on the R-hand value is rarely, if ever, what is desired. Often we want to ignore the internal structure of `x`.
-
-Instead this expands to:
-```
-x = 0
-  .a = 1
-```
-
-The previous example may be simple to reason about but it becomes harder to visually track as the syntax becomes more complex:
-```
-x, y.(a, b:(t = 1), c == 1, 2, 3), z == 4, 5, 6
-```
-
-Although not recommended, this syntax is valid. Due to our rule above, we can simplify this somewhat and read it as 2 expressions:
-* Ignore the internal structure of `b`
-  ```
-  a, b:(...), c == 1, 2, 3
-  ```
-* Ignore the internal structure of `y`
-  ```
-  x, y.(...), z == 4, 5, 6
-  ```
-Althought not perfect, ignoring the internal structure makes it easier to read which names are mapped to which values.
-
-If we instead wanted to model using destructuring it is a bit more verbose but at least it's using a flat list which may be preferable in some cases:
-```
-x, y, y.a, y.b, y.b:t, y.c, z == 4, 5, 1, 2, 1, 3, 6
-```
-
-or equivalently (which keeps more of the structure):
-```
-x, y, y.(a, b, b:t, c), z == 4, 5, 1, 2, 1, 3, 6
-```
-
-Even better is representing the data as a multiline literal (which should preferred for complex syntax):
-```
-x = 4
-y = 5
-  .a = 1
-  .b = 2
-    :t = 1
-  .c = 3
-z = 6
-```
-
-### Selection ignores parents
-
-When selection syntax is used, notice that only the bottom children names are selected. Consider the example:
-```
-x.(a, b:(t, u, v), c)
-```
-
-this will expand to:
-```
-(x.a, x.b:t, x.b:u, x.b:v, x.c)
-```
-
-This should be read as a sequence of names `(a, t, u, v, c)` and the paths required to get to them.
-
-You can pass the names which are used for structure they have to be passed as well. Let's edit this example to pass `x` as well:
-```
-(x, x.(a, b:(t, u, v), c))
-```
-
-this will expand to:
-```
-(x, x.a, x.b:t, x.b:u, x.b:v, x.c)
-```
-
-To change this example to focus on data definition instead of data selection; simply assign any name within the structure a value:
-```
-x.(a, b:(t, u = 1, v), c)
-```
-
-This changes the pattern from **selection** to **chain** b/c we're defining internal structure which hides all the interals of `x` until after this expression.
 
 ## Comments
 ------------------------------------------------------------------------------------------------------------
@@ -819,28 +744,379 @@ It can be used in multiple ways:
   "x + y is \(x + y)"
   ```
 
-## Sugar
+## Anonymous Children
 ------------------------------------------------------------------------------------------------------------
 
-* TODO
-  * Anon items
-    * and nesting
-    * use bullet * or dah - or both?
-  * | delimiter
-  * complex assignment
-    * always reduce to a sequence of expressions
-    * eg
-      * multi-assign `(x, y, z) = 1, 2, 3`
-      * destructure `x, y, z == 1, 2, 3`
-      * select `x.(a, b, c) = 1, 2, 3`
-  * 
-    
+There are cases where we want to represent a series of elements without a meaningful name.
+
+For example, consider the JavaScript code:
+```
+let myElems = [
+  [ a, [ b, c ], d ],
+  [ i, [ j, k ], l ],
+  [ w, [ x, y ], z ]
+```
+
+With our existing syntax we can model this in a similar way:
+```
+my-elems =
+  a, /( b, c ), d
+  i, /( j, k ), l
+  w, /( x, y ), z
+```
+
+However we can do better as this is starting to get noisy and harder to visually parse.
+
+To do so, we'll introduce a new syntax which allows us to define an anonymous child. Here's the rules:
+* The syntax is either `-` or `*` or the child relator `/`
+  * At this point it's the developer's choice as to which syntax to use (although they must do so consistently).
+* The same syntax must be used consistently for children at the same level
+* The syntax must be at the start of a line (ie after whitespace)
+* The anonymous item indicator is syntax only (just like parentheses) to inform the developer and compiler
+
+Using this we can expand our previous syntax to better model the structure of the data:
+```
+my-elems =
+  - a, 
+    b, c
+    d
+  - i
+    j, k
+    l
+  - w
+    x, y
+    z
+```
+
+and even more expanding:
+```
+my-elems =
+  - a, 
+    * b
+      c
+    d
+  - i
+    * j
+      k
+    l
+  - w
+    * x
+      y
+    z
+```
+
+Notice that we keep the same syntax for children at the same level. This is enfoced b/c it's much more clear and easier to visually track.
+
+### Layout
+
+To assure the grouping is clear and terse, we require the children of the anonymous item to immediately follow it and align to that position like:
+```
+my-elems =
+  - a
+    b
+    c
+  - x
+    y
+    z
+```
+
+and not:
+```
+my-elems =
+  -
+    a
+    b
+    c
+  -
+    x
+    y
+    z
+```
+
+### Nesting
+
+Items can be nested arbitrarily as long as they're consistent. Here's one example:
+```
+my-elems =
+  - - a
+      b
+    - c
+  - - i
+      j
+    - k
+  - - w
+      x
+    - z
+```
+
+This is read as:
+* a sequence of 3 elements
+* each contains a sequence of 2 elements
+* the first contains a sequence of 2 elements
+* the second constains a sequence of 1 element
+
+This can be rewritten to other forms as well which work well for non-deeply nested structures:
+```
+my-elems =
+  - a,b
+    c
+  - i, j
+    k
+  - w, x
+    z
+```
+
+## Issues, Edge-Cases, and Quirks
+------------------------------------------------------------------------------------------------------------
+
+Instead of an unfortunate developer discovering a quirk of the syntax in the middle of their work; we've done our best to discover and make them explicit.
+
+As the syntax grows more complex there will be more quirks which will be summarized at the end of each document.
+
+### Sequence of One
+
+Since Sequences are syntax, not data, a sequence of a single element is just that element.
+
+Sequences represent an ordered, one-to-many syntax container but doesn't represent data itself.
+
+For example, these are equivalent:
+```
+x.a = 1
+
+x.(a) = 1
+```
+
+### Inline Children vs Parentheses
+
+In order to dissambiguate grouping with inline children we use different syntaxes. Consider the example:
+```
+my-elems =
+  a
+  b, c
+  d
+```
+
+Although multiline data definition is often preferred, if we wanted to rewrite this inline you'd expect this to work:
+```
+my-elems = (a, (b, c), d)
+```
+
+However this results in a different grouping where the parentheses are dropped like:
+```
+my-elems =
+  a
+  b
+  c
+  d
+```
+
+Instead you'd have to use the parent-child relator like:
+```
+my-elems = (a, /(b, c), d)
+```
+
+This may seem an ackward choice but there are a few reasons this design was chosen:
+* In a future document, computation will be introduced. If we use `()` for both there are issues with what is and isn't dropped
+  * Consider the differences between the following psuedo-code and how evaluation (which uses parentheses for precedence) compares with parentheses for children:
+    ```
+    a = (1, (2, 3), 4)
+    b = (1 + 2)
+    c = (1, 2 + 3, 4)
+    d = (1, (2 + 3), 4)
+    e = (1, ((2 + 3)), 4)
+    f = (1, (fn 2, 3), 4)
+    g = (1, ((fn 2, 3) + 4), 5)
+    ```
+    Although it's possible to make deterministic rules it does grow in complexity quickly and makes it harder to visually parse.
+  * This has an added benefit in that dev are free to use parentheses and nest as deeply as they like and know they will be dropped.
+* It's not desirable to make computation and data definition orthogonal. Often we want to mix them together without having to do something like create a template and then bind values.
+* Parentheses stay somewhat pure in their purpose and usage. They can stay just syntax (not data) and their purpose is to group things together.
+* It's somewhat rare to nest inline children when there's many more visually clear ways to declare data.
+* It keeps the syntax for inline children `/()` orthogonal to precedence/grouping `()`. The purpose and effect is clear.
+* Often inline children will be wrapped as a data-literal (like `List []` or `Map {}`) or some other type of container like a function, Type, etc.
+* Parentheses work the way most developers are accustomed for computation.
+
+### Inline Overwrite
+
+Consider the simple example:
+```
+(x = 0) = 1
+```
+
+This is read as:
+* Assign `x` to `0`
+* Get result of `x = 0` expression
+* Assign result to `1`
+
+Elder doesn't allow this syntax and will emit a syntax error.
+
+The reasoning is that code like this will lead to more bugs than use-cases.
+
+Instead to assign multiple values to the same name you need to do so using multiple statements:
+```
+x = 0
+x = 1
+```
+
+This makes the intent more clear.
+
+It has the added benefit of a user doesn't have to visually track which names are used multiple times as they can be confident they're not redefined.
+Even in complex statements it makes it slighly easier to mentally parse.
+
+### Orthogonal Syntax
+
+Elder syntax, thus far, generally falls into two purposes:
+* selecting names within some structure (often to be used to get or set values):
+  ```
+  x.(a, y.(b, c)) = 1, 2, 3
+  ```
+* defining data:
+  ```
+  x.(a = 1, y.(b = 2, c = 3))
+  ```
+
+These examples end up with the same data but by slightly different mechanisms.
+
+The former selects names `a` in path `x.` and selects `b, c` in path `x.y.`.
+The latter defines names `a` in path `x.` and defines names `b, c` in path `x.y.`.
+
+However, this isn't the extent of how we can use these patterns. For example, if we want to set the values for `x` and `y` we use different syntax.
+
+For updating the former it's straight forward by adding `x` and `y` to selected names:
+```
+(x.(a, y.(b, c)), x, y) = 0, 1, 2, 3, 4, 5
+```
+
+or using destructure which allows us to drop some of the parentheses:
+```
+x.(a, y.(b, c)), x, y == 0, 1, 2, 3, 4, 5
+```
+
+It's less clear how we assign values for `x` and `y` when defining data. Jumping ahead for clarity, the way Elder requires to assign values for `x` and `y` when defining data is:
+```
+x.(a = 1, y.(b = 2, c = 3) = 5) = 4
+```
+
+To explain why, let's start with a simpler example:
+```
+x.(a = 1) = 0
+```
+
+This can be read as steps:
+* Assigning a propery `a` to `1` within `x`
+* Get the result of the expression `x.(a = 1)`
+* Assign the result to `0`.
+
+The key question is what is the result of the expression `x.(a = 1)`? There are a few options:
+* `nothing`
+* `x.a`
+* `x`
+
+If the result is `nothing` there are some downsides:
+* `x.(a = 1) = 0` would be a syntax error b/c you can't assign nothing to `0`.
+* If we wanted to assign a value to `x` we would need to rework into a few statements like:
+  ```
+  x = 0
+  x.(a = 1)
+  ```
+  or a selection
+  ```
+  (x, x.a) = 0, 1
+  ```
+  or a destructure
+  ```
+  x, x.a == 0, 1
+  ```
+
+If the result is `x.a` the downside is we will be assigning the value to `x.a` twice. This is b/c the statement is equivalent to:
+```
+x.(a = 1) // The inner expression which may result in `x.a`
+x.a = 0   // Assigning a value to the result
+```
+Redefining values inline is rarely, if ever, what is desired and a likely source of errors.
+
+Instead Elder interprets the result of the expression as `x`. It avoids the issues above and has a few benefits:
+* It forces selection syntax and definition syntax to be orthogonal by:
+  * Selection syntax ignores the paths used to select the child names
+  * Definition syntax ignores the child definitions and selects the parent paths
+* Allows us to assign values to every name inline without potential of overwriting any of them
+* It composes more clearly
+  * Composing selection syntax in definition syntax like:
+    ```
+    x.(a, b, c == 1, 2, 3) = 0
+
+    // Equivalent to
+    (x, x.a, x.b, x.c) = 0, 1, 2, 3
+    ```
+  * Composing definition syntax in selection syntax like:
+    ```
+    x.(a = 4), y.(b = 5), z.(c = 6) == 1, 2, 3
+
+    // Equivalent to
+    (x, y, z, x.a, x.b, x.c) = 1, 2, 3, 4, 5, 6
+    ```
+* Definititions can represent arbitrarily nested and each value can be assigned without additional statements
+  * eg consider a nested structure like:
+    ```
+    x.y.(a = 2, b = 3, c = 4)
+    ```
+    we want to assign values to both `x` and `y` we can do so inline by:
+    ```
+    x.(y.(a = 2, b = 3, c = 4) = 1) = 0
+    ```
+    which is equivalent to the selection form:
+    ```
+    (x, y, x.y.a, x.y.b, x.y.c) = 0, 1, 2, 3, 4
+    ```
+
+### Nested Assignment
+
+As the syntax becomes more complex it also becomes harder to visually track the structure:
+```
+x, y.(a, b:(t = 1), c == 1, 2, 3), z == 4, 5, 6
+```
+
+Although not recommended, this syntax is valid.
+
+Our rules above provide a few guarantees:
+* No name is overwritten in a single line
+* Definition and selection syntax are orthogonal
+
+Using these guarantees we can simplify this somewhat and read it as 2 expressions:
+* Ignore the internal structure of `b` b/c it's definition syntax
+  ```
+  a, b:(...), c == 1, 2, 3
+  ```
+* Ignore the internal structure of `y` b/c it's definition syntax
+  ```
+  x, y.(...), z == 4, 5, 6
+  ```
+Althought not perfect, ignoring the internal structure makes it easier to read which names are mapped to which values.
+
+If we instead wanted to model using destructuring it is a bit more verbose but at least it's using a flat list which may be preferable in some cases:
+```
+x, y, y.a, y.b, y.b:t, y.c, z == 4, 5, 1, 2, 1, 3, 6
+```
+
+or equivalently (which mimics the natural data structure):
+```
+x, y, y.(a, b, b:t, c), z == 4, 5, 1, 2, 1, 3, 6
+```
+
+Even better is representing the data as a multiline literal (which should preferred for complex syntax):
+```
+x = 4
+y = 5
+  .a = 1
+  .b = 2
+    :t = 1
+  .c = 3
+z = 6
+```
 
 ## Summary
 ------------------------------------------------------------------------------------------------------------
 
 This is all the syntax we need to express the base of the Elder syntax which is required for all implementations.
 
-The base syntax is at the level of S-expressions but doesn't really have a concept of literals, types, evaluation, etc. Instead it's all about the structure and requires implementors to have their own concepts if they use this level.
-
-If they want to rely on Elder syntax more and model languages like JSON, YAML, and many others we'll need to add more concepts. The first we use to extend the syntax is literals.
+The base syntax is comparable to S-expressions and doesn't really have a concept of literals, types, evaluation, etc. instead it's all about the structure and syntax.
