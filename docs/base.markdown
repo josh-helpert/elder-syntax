@@ -310,6 +310,7 @@ o.
 This is slightly more terse than the previous, structural representation as each of the common paths (`o.` and `b:`) are used. Although there's not much difference in this case; the usefulness is more pronounced in data which have deeply nested structure.
 
 ### Example - Deeply Nested Element
+
 A more realistic example is to browse to HTML element we're concerned with and work w/n that scope:
 ```
 html
