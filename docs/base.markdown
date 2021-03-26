@@ -1121,8 +1121,9 @@ Nearly all syntax in Elder is terminated at the end of the line.
 This allows us to use a start or open character but are not required to close it.
 
 It may feel ackward to use initially but there are some benefits:
-* Closing is only required when we want to terminate inline with more after it. When this isn't the case, we save a few less steps and syntactical noise.
-* The entire syntax uses the offside spacing rules. This jives with that decision as can use opening syntax element as a new start of a tree. This matches how we visually structure the code.
+* Later on we will be introducing how Elder interprets syntax. The order of interpretation is from left-to-right (like everything else). Unbalanced syntax works naturally with the order of interpretation.
+* Closing is only required when we want to terminate inline with more after it. When this isn't the case, we save a few steps causing less syntactical noise.
+* The entire syntax uses the offside spacing rules. Unbalanced syntax jives with that decision as can use opening syntax element as a new start of a tree. This matches how we visually structure the code.
 * Many syntax constructs have a open/close pattern. Not having to close them all can reduce visual noise and manual checkwork:
   * functions like `sum(1, 2, 3`
   * container literals like `my-map = { x = 1, y = 2, z = 3`
