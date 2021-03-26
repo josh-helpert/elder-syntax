@@ -1079,7 +1079,7 @@ x, y.(a, b:(t = 1), c == 1, 2, 3), z == 4, 5, 6
 Although not recommended, this syntax is valid.
 
 Our rules above provide a few guarantees:
-* No name is overwritten in a single line
+* No name is overwritten in the same line
 * Definition and selection syntax are orthogonal
 
 Using these guarantees we can simplify this somewhat and read it as 2 expressions:
