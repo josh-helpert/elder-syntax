@@ -1132,13 +1132,16 @@ It may feel ackward to use initially but there are some benefits:
 
 ### Prioritizing Names
 
-When designing a language there are many different conventions that are used. Elder asserts that the name is more important that other choices like type declarations or modifiers.
+When designing a language there are many different conventions that can be selected from. One commonly chosen is to start declarations using modifiers (eg `const`, `let`, `var`) or keywords (eg `volatile`, `auto`, `static`) at the start of a line.
 
-Names are special to Elder which means that:
-* They almost always start a line
+Put simply, we disagree. Names starting the line is easier for understanding the structure, shape, and flow of code. Modifiers, constraints, and other syntax for declarations are significant as well but we've created alternative syntax to describe them.
+
+This choice has a few effects like:
+* Names almost always start a line
   * This make data-definition and L-hand assignment consistent which is very common
   * It makes it easier to browse and grok the shape of the data or block the developer is looking at
   * It's easier to align elements into logical units where names are on the left, values are on the right, and how they relate to one another is in the middle (often assignment `=`)
+  * The syntax is more regular between data declaration, definition, usage, and description
 * We don't have special syntax, modifiers, or operators before or surrounding names. Instead the operators, relators, and values are used to specify these.
   * Generally names and relators describe where, values describe what, and relators describe how.
 * Names act like their own namespace where their attributes, metadata, and other details are described within it.
