@@ -1114,6 +1114,35 @@ y = 5
 z = 6
 ```
 
+### Unbalanced Syntax
+
+Nearly all syntax in Elder is terminated at the end of the line.
+
+This allows us to use a start or open character but are not required to close it.
+
+It may feel ackward to use initially but there are some benefits:
+* Closing is only required when we want to terminate inline with more after it. When this isn't the case, we save a few less steps and syntactical noise.
+* The entire syntax uses the offside spacing rules. This jives with that decision as can use opening syntax element as a new start of a tree. This matches how we visually structure the code.
+* Many syntax constructs have a open/close pattern. Not having to close them all can reduce visual noise and manual checkwork:
+  * functions like `sum(1, 2, 3`
+  * container literals like `my-map = { x = 1, y = 2, z = 3`
+  * string literal like `name = "Billy Bane`
+  * types like `my-map = Map(x = 1, y = 2, z = 3`
+
+### Prioritizing Names
+
+When designing a language there are many different conventions that are used. Elder asserts that the name is more important that other choices like type declarations or modifiers.
+
+Names are special to Elder which means that:
+* They almost always start a line
+  * This make data-definition and L-hand assignment consistent which is very common
+  * It makes it easier to browse and grok the shape of the data or block the developer is looking at
+  * It's easier to align elements into logical units where names are on the left, values are on the right, and how they relate to one another is in the middle (often assignment `=`)
+* We don't have special syntax, modifiers, or operators before or surrounding names. Instead the operators, relators, and values are used to specify these.
+  * Generally names and relators describe where, values describe what, and relators describe how.
+* Names act like their own namespace where their attributes, metadata, and other details are described within it.
+  * Defining a context and then it's details within it will become a common pattern. Names first make this even more consistent.
+
 ## Summary
 ------------------------------------------------------------------------------------------------------------
 
