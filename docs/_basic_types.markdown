@@ -1,5 +1,5 @@
 TODO:
-* Not just types but also type-like: interafce, traits, duck, nominal, etc.
+* Not just types but also type-like: interface, traits, duck, nominal, etc.
 * built-in
   * start w/ these?
   * how to deal w/ not representable in runtime
@@ -9,6 +9,7 @@ TODO:
   * logical are what we treat something as
   * storage is what it's actual memory is
   * maybe others as well like aggregate which is a layer between logical and actual memory b/c we often want to pool or statically allocate or whatever...
+    * many layers?
 * Copy good ideas from Julia, Zig, Ada/Agda, ...
 * Implicit casts?
 * Support coefficients?
@@ -21,6 +22,21 @@ Reserved TODO:
 * names
 * meta
 * types, traits, interfaces, ...
+
+Basic Types TODO:
+* No need for tuple b/c implicit w/ Seq?
+  * Other not needed?
+* Enum?
+* Meta
+  * Unknown
+  * Any
+  * Void
+  * Never
+  * Null and Undefined
+* String prefix
+  * eg raw string `r"\t\n"` is exactly `"\t\n"` not expanded
+    * further `r"a""b"` will expand as `a"b"`
+  * a common pattern where we have a very reserved syntax have multiple modes? especially w/ prefix?
 
 
 ## Reserved and Builtin
@@ -347,8 +363,36 @@ Literals are divided into a few major categories:
       Notice that the elements are separated by newlines and the leading space for each child is ignored.
   * Block code ```` ``` ```` interprets it's children as unevaluated code
 
+TODO:
+* Primitives values
+  * True, False
+  * Null
+  * Undefined
+* Logic
+  * True, False
+  * Maybe? Optional?
+  * 
+* edge-cases
+  * Implicit or explicit coersion
+    * 1.0 * 2
+    * 1 / 2.0
+  * Implicit or explicit type casting
+    * ie all `Decimal` are `Number` but not vice-versa
+    * if implicit is diff between logical and memory type and both can be tracked separately so can still be customized and matched against
+
 ## Types
 ------------------------------------------------------------------------------------------------------------
+
+### Categories of Types
+
+* some or all elems
+* layer/describe what/target what
+  * memory, mem abs, logical, logical abs, trait/proto/typeclass, other?
+* 
+
+### Abstract vs Logical vs Memory
+
+Often when a type is specified it's implicitly a 
 
 ### Refinement
 
@@ -459,3 +503,84 @@ Defaulting is used to:
 ### Inference 
 
 Although this is used throughout Elder, as it relates to types this is often how type inference is done.
+
+## Narrowing
+------------------------------------------------------------------------------------------------------------
+
+TODO:
+* Consider introducing `and`, `or` types b/c we can specify later on more fully?
+* When const, will narrow to known value
+  * This is true of everything even w/ comptime!
+  * eg diff
+    ```
+    const hola-world = "Hola World" // Type is value "Hola World"
+
+    let hello-world = "Hello World" // Type is String
+    ```
+* Literals
+  * `or` type like `1 or 2 or 3` or `or(1, 2, 3)` or `1...3` or `1..<3`
+
+## Schema
+------------------------------------------------------------------------------------------------------------
+
+There are several common ways to describe metadata about a name:
+* Inference
+  * 
+* Explicit
+  * Cast/Interpretate-as
+* Schema
+  * 
+* Custom
+  * Comptime Type, Function, Proto
+* C++ ideas
+  * Implicit (all shorts can be ints)
+    ```
+    short a = 1;
+    int   b = a;
+    ```
+  * Explicit
+    ```
+    short a = 1;
+    int   b = (int)a;
+    int   c = int(a);
+    ```
+  * Dynamic: Pointers and References
+    ```
+    ```
+  * Static
+    ```
+    ```
+  * Reinterpret
+    ```
+    ```
+  * Const
+    ```
+    ```
+
+
+
+
+TODO:
+* Infer vs Cast vs Schema
+  * Can control to like infer from 1st elem w/ a comptime fn or comptime time like `InferFirst`
+    * This more of a comptime util
+* How to differentiate betwen container of type or values or mixed?
+  ```
+  List Int 3             => [3]
+  List Int, 3, String    => [Int, 3, String]
+  List Int, Bool, String => [Int, Bool, String]
+  ```
+* Often Schema isn't really just the Type info but also:
+  * shape of data
+    * any compliant shape (and covariant type) will work
+  * DRY up repretition and only specify the differences
+
+
+x:Map(String, Int)
+
+x
+  :Map
+    (
+      String
+      Int
+

@@ -4,6 +4,29 @@ title: Comptime
 permalink: comptime
 ---
 
+Many languages use compile time in just a few ways and is kept isolated from the developer. Elder takes a different approach by making it easier (and safer) to develop at compile time.
+
+Elder exposes compile time is in a few main ways:
+* When compilation occurs (lexing, parsing, codegen, ...)
+* Correctness
+  * Specification
+    * 
+  * Analysis
+  * Verification
+* Code generation (codegen) and erasing
+* Compile time (comptime) execution and knowns
+* 
+
+
+
+
+
+
+
+
+
+
+
 In Elder, concepts like Types, Traits, Interfaces, Protocols, etc. are really just a subset of a features provided by compile time execution.
 
 Instead of thinking of specialized concepts which conflict and have nuanced requirements, Elder conceptualizes all of these as compile time execution combined with the metadata relator (`:`). We also give special meaning to some metadata relator keys like `type` but a developer is free to add their own.
