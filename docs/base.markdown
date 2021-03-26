@@ -7,7 +7,7 @@ permalink: syntax
 
 The elements in this document form the base of Elder syntax.
 
-Much how S-expressions are separate from any LISP implementation but is the most commonly used syntax; the Elder syntax can be used alone but is the preferred syntax of the Elder language.
+Must how S-expressions are separate from any LISP implementation but is the most commonly used syntax; the Elder syntax can be used alone but is the preferred syntax of the Elder language.
 
 ## Sequence
 ------------------------------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ z
 ```
 
 ### Inline Siblings
-To write more compact code we have to introduce new syntax. The comma `,` which:
+To write more compact code we have to introduce new syntax. The comma `,`:
 * Represents a sibling w/n a sequence
 * Internally `,` translates into a `\n` so the two forms are equivalent
 * For consistency and clarity, you can't mix inline and multiline syntax `,` for the same sequence
@@ -310,7 +310,6 @@ o.
 This is slightly more terse than the previous, structural representation as each of the common paths (`o.` and `b:`) are used. Although there's not much difference in this case; the usefulness is more pronounced in data which have deeply nested structure.
 
 ### Example - Deeply Nested Element
-
 A more realistic example is to browse to HTML element we're concerned with and work w/n that scope:
 ```
 html
@@ -504,7 +503,7 @@ y = 2
 Since destructuring is very common we introduce a new syntax `==` which makes it easier to express with minimal visual noise. This is nearly identical to `=` except that:
 * It's relative precedence is less than `,`
   * Note: We don't support a global precedence table like many C-style languages, instead all precedence is either relative or not-defined and you must use `()`
-* It groups the L-hand and R-hand into `()`. This means `a, b == x, y` becomes `(a, b) = (x, y)`
+* It groups the L-hand and R-hand into `()`. This means `a, b == x, y` is basically `(a, b) = (x, y)`
 
 Using the new syntax, there's a few ways to make this example parse as a destructure:
 * Use `()` to group children together
@@ -516,10 +515,37 @@ Using the new syntax, there's a few ways to make this example parse as a destruc
   (x, y) = 1, 2
   ```
   It's clear now that we mean we can to assign both values `x, y`.
-* Use `==` syntax which reduces the need for parentheses in many cases
+* Use `==` syntax
   ```
   x, y == 1, 2
   ```
+
+### Nested Destructure
+
+Consider a slightly more complex example with nested destructuring:
+```
+a, (b, c == 1, 2) == (x, y == 3, 4), z
+```
+
+which after 1 step of evaluation is:
+```
+a, (b = 1, c = 2) == (x = 3, y = 4), z
+```
+
+after another step:
+```
+(a, b = 1, c = 2) = (x = 3, y = 4, z)
+```
+
+finally evaluates to:
+```
+(a, b = 1, c = 2) = (x = 3, y = 4, z)
+```
+
+for clarity, the original expression expands to explicit precedence:
+```
+(a, ((b, c) = (1, 2))) = (((x, y) = (3, 4)), z)
+```
 
 ## 6 Common Patterns
 ------------------------------------------------------------------------------------------------------------
@@ -729,7 +755,6 @@ let myElems = [
   [ a, [ b, c ], d ],
   [ i, [ j, k ], l ],
   [ w, [ x, y ], z ]
-]
 ```
 
 With our existing syntax we can model this in a similar way:
@@ -904,7 +929,7 @@ This may seem an ackward choice but there are a few reasons this design was chos
     ```
     Although it's possible to make deterministic rules it does grow in complexity quickly and makes it harder to visually parse.
   * This has an added benefit in that dev are free to use parentheses and nest as deeply as they like and know they will be dropped.
-* It is not desirable to make computation and data definition orthogonal contexts. Often we want to mix them together without having to do something like create a template and then bind values.
+* It's not desirable to make computation and data definition orthogonal. Often we want to mix them together without having to do something like create a template and then bind values.
 * Parentheses stay somewhat pure in their purpose and usage. They can stay just syntax (not data) and their purpose is to group things together.
 * It's somewhat rare to nest inline children when there's many more visually clear ways to declare data.
 * It keeps the syntax for inline children `/()` orthogonal to precedence/grouping `()`. The purpose and effect is clear.
@@ -1088,6 +1113,35 @@ y = 5
   .c = 3
 z = 6
 ```
+
+### Unbalanced Syntax
+
+Nearly all syntax in Elder is terminated at the end of the line.
+
+This allows us to use a start or open character but are not required to close it.
+
+It may feel ackward to use initially but there are some benefits:
+* Closing is only required when we want to terminate inline with more after it. When this isn't the case, we save a few less steps and syntactical noise.
+* The entire syntax uses the offside spacing rules. This jives with that decision as can use opening syntax element as a new start of a tree. This matches how we visually structure the code.
+* Many syntax constructs have a open/close pattern. Not having to close them all can reduce visual noise and manual checkwork:
+  * functions like `sum(1, 2, 3`
+  * container literals like `my-map = { x = 1, y = 2, z = 3`
+  * string literal like `name = "Billy Bane`
+  * types like `my-map = Map(x = 1, y = 2, z = 3`
+
+### Prioritizing Names
+
+When designing a language there are many different conventions that are used. Elder asserts that the name is more important that other choices like type declarations or modifiers.
+
+Names are special to Elder which means that:
+* They almost always start a line
+  * This make data-definition and L-hand assignment consistent which is very common
+  * It makes it easier to browse and grok the shape of the data or block the developer is looking at
+  * It's easier to align elements into logical units where names are on the left, values are on the right, and how they relate to one another is in the middle (often assignment `=`)
+* We don't have special syntax, modifiers, or operators before or surrounding names. Instead the operators, relators, and values are used to specify these.
+  * Generally names and relators describe where, values describe what, and relators describe how.
+* Names act like their own namespace where their attributes, metadata, and other details are described within it.
+  * Defining a context and then it's details within it will become a common pattern. Names first make this even more consistent.
 
 ## Summary
 ------------------------------------------------------------------------------------------------------------
