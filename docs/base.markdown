@@ -1079,7 +1079,7 @@ x, y.(a, b:(t = 1), c == 1, 2, 3), z == 4, 5, 6
 Although not recommended, this syntax is valid.
 
 Our rules above provide a few guarantees:
-* No name is overwritten in a single line
+* No name is overwritten in the same line
 * Definition and selection syntax are orthogonal
 
 Using these guarantees we can simplify this somewhat and read it as 2 expressions:
@@ -1121,8 +1121,9 @@ Nearly all syntax in Elder is terminated at the end of the line.
 This allows us to use a start or open character but are not required to close it.
 
 It may feel ackward to use initially but there are some benefits:
-* Closing is only required when we want to terminate inline with more after it. When this isn't the case, we save a few less steps and syntactical noise.
-* The entire syntax uses the offside spacing rules. This jives with that decision as can use opening syntax element as a new start of a tree. This matches how we visually structure the code.
+* Later on we will be introducing how Elder interprets syntax. The order of interpretation is from left-to-right (like everything else). Unbalanced syntax works naturally with the order of interpretation.
+* Closing is only required when we want to terminate inline with more after it. When this isn't the case, we save a few steps causing less syntactical noise.
+* The entire syntax uses the offside spacing rules. Unbalanced syntax jives with that decision as can use opening syntax element as a new start of a tree. This matches how we visually structure the code.
 * Many syntax constructs have a open/close pattern. Not having to close them all can reduce visual noise and manual checkwork:
   * functions like `sum(1, 2, 3`
   * container literals like `my-map = { x = 1, y = 2, z = 3`
@@ -1131,13 +1132,16 @@ It may feel ackward to use initially but there are some benefits:
 
 ### Prioritizing Names
 
-When designing a language there are many different conventions that are used. Elder asserts that the name is more important that other choices like type declarations or modifiers.
+When designing a language there are many different conventions that can be selected from. One commonly chosen is to start declarations using modifiers (eg `const`, `let`, `var`) or keywords (eg `volatile`, `auto`, `static`) at the start of a line.
 
-Names are special to Elder which means that:
-* They almost always start a line
+Put simply, we disagree. Names starting the line is easier for understanding the structure, shape, and flow of code. Modifiers, constraints, and other syntax for declarations are significant as well but we've created alternative syntax to describe them.
+
+This choice has a few effects like:
+* Names almost always start a line
   * This make data-definition and L-hand assignment consistent which is very common
   * It makes it easier to browse and grok the shape of the data or block the developer is looking at
   * It's easier to align elements into logical units where names are on the left, values are on the right, and how they relate to one another is in the middle (often assignment `=`)
+  * The syntax is more regular between data declaration, definition, usage, and description
 * We don't have special syntax, modifiers, or operators before or surrounding names. Instead the operators, relators, and values are used to specify these.
   * Generally names and relators describe where, values describe what, and relators describe how.
 * Names act like their own namespace where their attributes, metadata, and other details are described within it.
