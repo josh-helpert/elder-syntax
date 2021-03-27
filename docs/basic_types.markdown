@@ -158,8 +158,9 @@ By default there are values which are interpreted as known types to avoid unnece
   * Binary   `0b1010`
   * Octal    `0o744`
 * Logic
-  * True for true, False for false
+  * `True` for logical true, `False` for logical false
   * Notice these looks like Types and will be explained later once comptime is introduced
+  * There aren't any implicit conversion to boolean
 
 ## Types
 ------------------------------------------------------------------------------------------------------------
